@@ -1,0 +1,25 @@
+# --- Archivos de sistema (Windows / OneDrive / macOS) ---
+desktop.ini
+Thumbs.db
+ehthumbs.db
+*.lnk
+.DS_Store
+
+# --- Editores / IDE ---
+.vscode/
+.idea/
+*.swp
+*~
+
+# --- Dependencias y temporales ---
+node_modules/
+npm-debug.log*
+*.tmp
+*.bak
+
+# --- Variables de entorno locales (por si se agregan en el futuro) ---
+.env
+.env.*
+
+# IMPORTANTE: la carpeta evidencias/ NO se ignora.
+# Los logs evidencias/resultados-*.log son un entregable del taller.
