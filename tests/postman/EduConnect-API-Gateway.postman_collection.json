@@ -1,0 +1,1058 @@
+{
+  "info": {
+    "_postman_id": "5b3031de-b176-45a5-b149-95b958df5d1f",
+    "name": "EduConnect - PoC API Gateway (Kong)",
+    "description": "Pruebas positivas y negativas de los Retos 1-4 y el desafío Certificados. Ejecutar con `docker compose up -d` activo. Credenciales FICTICIAS de laboratorio.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Reto 1 - Punto de acceso único",
+      "item": [
+        {
+          "name": "GET /api/estudiantes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKeyQA}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/estudiantes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "estudiantes"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);",
+                  "pm.test(\"Respondió ms-estudiantes\", () => {",
+                  "  pm.expect(pm.response.headers.get(\"X-Servicio-Origen\")).to.eql(\"ms-estudiantes\");",
+                  "  pm.expect(pm.response.json().servicio).to.eql(\"estudiantes\");",
+                  "});",
+                  "pm.test(\"Content-Type JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/matriculas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKeyQA}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/matriculas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matriculas"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);",
+                  "pm.test(\"Respondió ms-matriculas\", () => {",
+                  "  pm.expect(pm.response.headers.get(\"X-Servicio-Origen\")).to.eql(\"ms-matriculas\");",
+                  "  pm.expect(pm.response.json().servicio).to.eql(\"matriculas\");",
+                  "});",
+                  "pm.test(\"Content-Type JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/pagos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKeyQA}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pagos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pagos"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);",
+                  "pm.test(\"Respondió ms-pagos\", () => {",
+                  "  pm.expect(pm.response.headers.get(\"X-Servicio-Origen\")).to.eql(\"ms-pagos\");",
+                  "  pm.expect(pm.response.json().servicio).to.eql(\"pagos\");",
+                  "});",
+                  "pm.test(\"Content-Type JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reto 2 - API Key",
+      "item": [
+        {
+          "name": "Sin API Key -> 401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/estudiantes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "estudiantes"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);",
+                  "pm.test(\"Mensaje de Kong\", () => pm.expect(pm.response.json().message).to.match(/No API key/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API Key incorrecta -> 401",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKeyInvalida}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/estudiantes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "estudiantes"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API Key válida -> 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKeyQA}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/matriculas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matriculas"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);",
+                  "pm.test(\"Respondió ms-matriculas\", () => {",
+                  "  pm.expect(pm.response.headers.get(\"X-Servicio-Origen\")).to.eql(\"ms-matriculas\");",
+                  "  pm.expect(pm.response.json().servicio).to.eql(\"matriculas\");",
+                  "});",
+                  "pm.test(\"Content-Type JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reto 3 - Rate limiting (5/min app-movil)",
+      "description": "Ejecutar con Collection Runner, en orden y sin delay. Si se repite, esperar 60 s para que se reinicie la ventana. Las 6 solicitudes usan el consumidor app-movil-educonnect y se reparten entre las 3 APIs: el límite suma todas.",
+      "item": [
+        {
+          "name": "RL #1 estudiantes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKeyMovil}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/estudiantes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "estudiantes"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Evita partir la ventana de minuto fijo: si faltan menos de 20 s para el",
+                  "// cambio de minuto, espera al inicio del siguiente.",
+                  "const s = new Date().getSeconds();",
+                  "if (s > 40) {",
+                  "  console.log(`Esperando ${61 - s} s al inicio del siguiente minuto...`);",
+                  "  setTimeout(() => {}, (61 - s) * 1000);",
+                  "}",
+                  "console.log(`[${new Date().toISOString()}] INICIO de la secuencia`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "RL #2 matriculas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKeyMovil}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/matriculas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matriculas"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "RL #3 pagos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKeyMovil}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pagos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pagos"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "RL #4 estudiantes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKeyMovil}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/estudiantes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "estudiantes"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "RL #5 matriculas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKeyMovil}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/matriculas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "matriculas"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "RL #6 pagos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKeyMovil}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pagos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pagos"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 429\", () => pm.response.to.have.status(429));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Otro consumidor (qa) no afectado",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKeyQA}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/estudiantes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "estudiantes"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reto 4 - Casos negativos",
+      "item": [
+        {
+          "name": "Ruta no registrada -> 404",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKeyQA}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/no-existe",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "no-existe"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);",
+                  "pm.test(\"Kong: sin Route\", () => pm.expect(pm.response.json().message).to.match(/no Route matched/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST no habilitado -> 404",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKeyQA}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/estudiantes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "estudiantes"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reto 4b - Backend caído (manual)",
+      "description": "Ejecutar por separado. 1) docker compose stop ms-pagos  2) Send  3) docker compose start ms-pagos. No incluir en la corrida completa del Runner.",
+      "item": [
+        {
+          "name": "Backend caído -> 502/503/504",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKeyQA}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/pagos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pagos"
+              ]
+            },
+            "description": "ANTES de enviar: docker compose stop ms-pagos. DESPUÉS: docker compose start ms-pagos. 502 = conexión rechazada/inalcanzable; 503 = nombre DNS no resuelto; 504 = timeout de conexión."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Código de fallo de upstream\", () => pm.expect(pm.response.code).to.be.oneOf([502,503,504]));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Desafío - Certificados",
+      "item": [
+        {
+          "name": "Certificados sin API Key -> 401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/certificados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "certificados"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Certificados qa #1",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKeyQA}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/certificados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "certificados"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Evita partir la ventana de minuto fijo: si faltan menos de 20 s para el",
+                  "// cambio de minuto, espera al inicio del siguiente.",
+                  "const s = new Date().getSeconds();",
+                  "if (s > 40) {",
+                  "  console.log(`Esperando ${61 - s} s al inicio del siguiente minuto...`);",
+                  "  setTimeout(() => {}, (61 - s) * 1000);",
+                  "}",
+                  "console.log(`[${new Date().toISOString()}] INICIO de la secuencia`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);",
+                  "pm.test(\"Respondió ms-certificados\", () => {",
+                  "  pm.expect(pm.response.headers.get(\"X-Servicio-Origen\")).to.eql(\"ms-certificados\");",
+                  "  pm.expect(pm.response.json().servicio).to.eql(\"certificados\");",
+                  "});",
+                  "pm.test(\"Content-Type JSON\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Certificados qa #2",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKeyQA}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/certificados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "certificados"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Certificados qa #3",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKeyQA}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/certificados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "certificados"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Certificados qa #4",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKeyQA}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/certificados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "certificados"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 429\", () => pm.response.to.have.status(429));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Certificados app-movil #1",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKeyMovil}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/certificados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "certificados"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Certificados app-movil #2",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKeyMovil}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/certificados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "certificados"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Certificados app-movil #3",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-api-key",
+                "value": "{{apiKeyMovil}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/certificados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "certificados"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 429\", () => pm.response.to.have.status(429));",
+                  "console.log(`[${new Date().toISOString()}] ${pm.info.requestName} -> ${pm.response.code} | restante/min=${pm.response.headers.get(\"X-RateLimit-Remaining-Minute\")}`);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Admin API (evidencia de configuración)",
+      "item": [
+        {
+          "name": "Info / versión",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adminUrl}}/",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": []
+            }
+          }
+        },
+        {
+          "name": "Services",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adminUrl}}/services",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "services"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Routes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adminUrl}}/routes",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "routes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Consumers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adminUrl}}/consumers",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "consumers"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Plugins",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{adminUrl}}/plugins",
+              "host": [
+                "{{adminUrl}}"
+              ],
+              "path": [
+                "plugins"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "adminUrl",
+      "value": "http://localhost:8001"
+    },
+    {
+      "key": "apiKeyQA",
+      "value": "lab-qa-41d8b6f0-NO-REAL"
+    },
+    {
+      "key": "apiKeyMovil",
+      "value": "lab-movil-7f3a9c2e-NO-REAL"
+    },
+    {
+      "key": "apiKeyInvalida",
+      "value": "llave-incorrecta-123"
+    }
+  ]
+}

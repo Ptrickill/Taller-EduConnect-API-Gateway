@@ -1,0 +1,111 @@
+# =============================================================================
+# EduConnect - PoC API Gateway (Kong 3.9.1 OSS, modo DB-less)
+# Arranque:  docker compose up -d
+# Parada:    docker compose down
+# =============================================================================
+name: educonnect-poc
+
+# Plantilla común de los mocks: mismo código (mocks/server.js), cuatro
+# contenedores/procesos independientes, cada uno con su identidad y datos.
+x-mock: &mock
+  image: node:22-alpine
+  working_dir: /app
+  command: ["node", "server.js"]
+  restart: unless-stopped
+  networks: [educonnect-net]
+  # Sin "ports": los backends NO se exponen al host. Solo Kong es accesible.
+  healthcheck:
+    test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:$$PORT/health || exit 1"]
+    interval: 10s
+    timeout: 3s
+    retries: 3
+    start_period: 5s
+
+services:
+  ms-estudiantes:
+    <<: *mock
+    container_name: ms-estudiantes
+    environment:
+      SERVICE_NAME: estudiantes
+      PORT: "3001"
+      RESOURCE_PATH: /estudiantes
+    volumes:
+      - ./mocks/server.js:/app/server.js:ro
+      - ./mocks/data:/app/data:ro
+
+  ms-matriculas:
+    <<: *mock
+    container_name: ms-matriculas
+    environment:
+      SERVICE_NAME: matriculas
+      PORT: "3002"
+      RESOURCE_PATH: /matriculas
+    volumes:
+      - ./mocks/server.js:/app/server.js:ro
+      - ./mocks/data:/app/data:ro
+
+  ms-pagos:
+    <<: *mock
+    container_name: ms-pagos
+    environment:
+      SERVICE_NAME: pagos
+      PORT: "3003"
+      RESOURCE_PATH: /pagos
+    volumes:
+      - ./mocks/server.js:/app/server.js:ro
+      - ./mocks/data:/app/data:ro
+
+  # Desafío de transferencia: cuarto backend
+  ms-certificados:
+    <<: *mock
+    container_name: ms-certificados
+    environment:
+      SERVICE_NAME: certificados
+      PORT: "3004"
+      RESOURCE_PATH: /certificados
+    volumes:
+      - ./mocks/server.js:/app/server.js:ro
+      - ./mocks/data:/app/data:ro
+
+  kong:
+    image: kong:3.9.1          # versión FIJADA (ver README: justificación)
+    container_name: educonnect-kong
+    restart: unless-stopped
+    environment:
+      KONG_DATABASE: "off"                                  # modo DB-less
+      KONG_DECLARATIVE_CONFIG: /kong/declarative/kong.yml
+      KONG_PROXY_LISTEN: "0.0.0.0:8000"
+      KONG_ADMIN_LISTEN: "0.0.0.0:8001"                     # publicado solo en 127.0.0.1 (abajo)
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_LOG_LEVEL: notice
+      # DNS: los contenedores pueden cambiar de IP al reiniciarse. El DNS
+      # interno de Docker publica TTL=600 s; se fuerza un TTL corto para que
+      # Kong vuelva a resolver rápido (trade-off: más consultas DNS).
+      KONG_DNS_VALID_TTL: "5"
+      KONG_DNS_STALE_TTL: "5"
+      KONG_DNS_NOT_FOUND_TTL: "5"
+    volumes:
+      - ./kong/kong.yml:/kong/declarative/kong.yml:ro
+    ports:
+      - "8000:8000"             # ÚNICO punto de entrada público (proxy)
+      - "127.0.0.1:8001:8001"   # Admin API: solo desde el equipo local, solo lectura de evidencias
+    networks: [educonnect-net]
+    depends_on:
+      - ms-estudiantes
+      - ms-matriculas
+      - ms-pagos
+      - ms-certificados
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+networks:
+  educonnect-net:
+    name: educonnect-net
+    driver: bridge

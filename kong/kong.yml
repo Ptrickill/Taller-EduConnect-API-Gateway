@@ -1,0 +1,166 @@
+# =============================================================================
+# EduConnect PoC - Configuración declarativa de Kong Gateway (modo DB-less)
+# Versión objetivo: Kong Gateway OSS 3.9.1  (_format_version 3.0)
+#
+# Modelo:
+#   Service  = DESTINO (a qué backend y con qué timeouts se reenvía)
+#   Route    = CRITERIO DE COINCIDENCIA (qué solicitudes públicas entran)
+#   Consumer = CLIENTE EXTERNO identificado por su credencial
+#   Plugin   = POLÍTICA (key-auth, rate-limiting) con un alcance definido
+#
+# Los backends se direccionan por NOMBRE DE SERVICIO de Docker Compose
+# (DNS interno de la red educonnect-net), nunca por IP.
+#
+# ADVERTENCIA: las API Keys de este archivo son FICTICIAS y solo para el
+# laboratorio local. No reutilizar en ningún entorno real.
+# =============================================================================
+_format_version: "3.0"
+_transform: true
+
+services:
+  # ---------------------------------------------------------------- Estudiantes
+  - name: svc-estudiantes
+    url: http://ms-estudiantes:3001/estudiantes
+    connect_timeout: 2000   # ms; falla rápido si el backend no está disponible
+    read_timeout: 5000
+    write_timeout: 5000
+    retries: 1
+    tags: [educonnect, poc]
+    routes:
+      - name: rt-estudiantes
+        paths: [/api/estudiantes]
+        methods: [GET]
+        strip_path: true    # /api/estudiantes -> /estudiantes en el backend
+        protocols: [http, https]
+        tags: [educonnect, poc]
+
+  # ----------------------------------------------------------------- Matrículas
+  - name: svc-matriculas
+    url: http://ms-matriculas:3002/matriculas
+    connect_timeout: 2000
+    read_timeout: 5000
+    write_timeout: 5000
+    retries: 1
+    tags: [educonnect, poc]
+    routes:
+      - name: rt-matriculas
+        paths: [/api/matriculas]
+        methods: [GET]
+        strip_path: true
+        protocols: [http, https]
+        tags: [educonnect, poc]
+
+  # ---------------------------------------------------------------------- Pagos
+  - name: svc-pagos
+    url: http://ms-pagos:3003/pagos
+    connect_timeout: 2000
+    read_timeout: 5000
+    write_timeout: 5000
+    retries: 1
+    tags: [educonnect, poc]
+    routes:
+      - name: rt-pagos
+        paths: [/api/pagos]
+        methods: [GET]
+        strip_path: true
+        protocols: [http, https]
+        tags: [educonnect, poc]
+
+  # ------------------------------------- Certificados (desafío de transferencia)
+  - name: svc-certificados
+    url: http://ms-certificados:3004/certificados
+    connect_timeout: 2000
+    read_timeout: 5000
+    write_timeout: 5000
+    retries: 1
+    tags: [educonnect, poc, transferencia]
+    routes:
+      - name: rt-certificados
+        paths: [/api/certificados]
+        methods: [GET]
+        strip_path: true
+        protocols: [http, https]
+        tags: [educonnect, poc, transferencia]
+        plugins:
+          # Límite propio del endpoint: 3 req/min POR CONSUMIDOR, con contador
+          # independiente del resto de APIs. Alcance Route (precedencia mayor
+          # que Global), por lo que reemplaza al límite global en esta ruta.
+          - name: rate-limiting
+            instance_name: rl-certificados-ruta
+            config:
+              minute: 3
+              limit_by: consumer
+              policy: local
+              fault_tolerant: true
+              hide_client_headers: false
+
+# ------------------------------------------------------------------ Consumers
+consumers:
+  # Consumidor de prueba principal del Reto 3 (límite de 5 req/min).
+  - username: app-movil-educonnect
+    custom_id: EXT-001
+    tags: [externo, poc]
+    keyauth_credentials:
+      - key: lab-movil-7f3a9c2e-NO-REAL
+
+  # Consumidor para pruebas funcionales (Retos 1, 2, 4 y Certificados).
+  # Usa el límite base global, así las pruebas funcionales no consumen
+  # la cuota del consumidor de prueba de rate limiting.
+  - username: qa-integracion
+    custom_id: EXT-002
+    tags: [externo, poc]
+    keyauth_credentials:
+      - key: lab-qa-41d8b6f0-NO-REAL
+
+# ------------------------------------------------------------------- Plugins
+plugins:
+  # --- Autenticación (Reto 2) --------------------------------------------------
+  # Alcance GLOBAL: toda Route presente o futura exige API Key ("seguro por
+  # defecto"). Por eso /api/certificados quedó protegida sin configuración extra.
+  - name: key-auth
+    instance_name: key-auth-global
+    config:
+      key_names: [x-api-key]   # encabezado documentado para la credencial
+      key_in_header: true
+      key_in_query: false      # evita que la llave quede en logs/URLs
+      key_in_body: false
+      hide_credentials: true   # el backend NO recibe la API Key
+      run_on_preflight: true
+
+  # --- Límite base (protección general) ----------------------------------------
+  # Alcance GLOBAL, agregado por consumidor: 60 req/min para cualquier
+  # consumidor que no tenga una regla más específica.
+  - name: rate-limiting
+    instance_name: rl-base-global
+    config:
+      minute: 60
+      limit_by: consumer
+      policy: local
+      fault_tolerant: true
+
+  # --- Límite del consumidor de prueba (Reto 3) ---------------------------------
+  # Alcance CONSUMER: 5 req/min para app-movil-educonnect, SUMANDO las rutas
+  # estudiantes + matriculas + pagos (el plugin no está atado a Route/Service,
+  # por lo que el contador es único para el consumidor en este nodo).
+  - name: rate-limiting
+    instance_name: rl-consumidor-app-movil
+    consumer: app-movil-educonnect
+    config:
+      minute: 5
+      limit_by: consumer
+      policy: local
+      fault_tolerant: true
+
+  # --- Límite del consumidor de prueba en Certificados (transferencia) ----------
+  # Alcance CONSUMER + ROUTE (precedencia más alta que solo Consumer). Sin esta
+  # regla, el plugin de alcance Consumer ganaría sobre el de Route y
+  # app-movil tendría 5 req/min también en certificados.
+  - name: rate-limiting
+    instance_name: rl-app-movil-certificados
+    consumer: app-movil-educonnect
+    route: rt-certificados
+    config:
+      minute: 2
+      limit_by: consumer
+      policy: local
+      fault_tolerant: true

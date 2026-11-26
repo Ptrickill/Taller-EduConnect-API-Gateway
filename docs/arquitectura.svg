@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 700" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#334155"/>
+    </marker>
+    <marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#b91c1c"/>
+    </marker>
+  </defs>
+  <rect width="1180" height="700" fill="#ffffff"/>
+  <text x="590" y="32" text-anchor="middle" font-size="20" font-weight="700" fill="#0f172a">EduConnect · PoC API Gateway (Kong 3.9.1 OSS, DB-less, Docker Compose)</text>
+
+  <!-- Clientes -->
+  <rect x="20" y="80" width="200" height="330" rx="10" fill="#f8fafc" stroke="#94a3b8"/>
+  <text x="120" y="104" text-anchor="middle" font-weight="700" fill="#0f172a">Clientes externos</text>
+  <rect x="38" y="122" width="164" height="70" rx="8" fill="#e0f2fe" stroke="#0284c7"/>
+  <text x="120" y="146" text-anchor="middle" font-weight="600">App móvil</text>
+  <text x="120" y="164" text-anchor="middle" font-size="10.5">app-movil-educonnect</text>
+  <text x="120" y="180" text-anchor="middle" font-size="11">x-api-key: lab-movil-…</text>
+  <rect x="38" y="210" width="164" height="70" rx="8" fill="#e0f2fe" stroke="#0284c7"/>
+  <text x="120" y="234" text-anchor="middle" font-weight="600">Postman / scripts QA</text>
+  <text x="120" y="252" text-anchor="middle" font-size="11">Consumer qa-integracion</text>
+  <text x="120" y="268" text-anchor="middle" font-size="11">x-api-key: lab-qa-…</text>
+  <rect x="38" y="298" width="164" height="60" rx="8" fill="#fee2e2" stroke="#b91c1c"/>
+  <text x="120" y="322" text-anchor="middle" font-weight="600">Cliente sin llave</text>
+  <text x="120" y="340" text-anchor="middle" font-size="11">o con llave inválida</text>
+  <text x="120" y="390" text-anchor="middle" font-size="11" fill="#475569">Solo conocen</text>
+  <text x="120" y="404" text-anchor="middle" font-size="11" fill="#475569">http://localhost:8000/api/*</text>
+
+  <!-- Host -->
+  <rect x="250" y="60" width="910" height="620" rx="12" fill="none" stroke="#64748b" stroke-dasharray="6 4"/>
+  <text x="266" y="82" font-weight="700" fill="#475569">Equipo local (Docker host)</text>
+
+  <!-- Red -->
+  <rect x="300" y="100" width="840" height="430" rx="12" fill="#f0fdf4" stroke="#16a34a"/>
+  <text x="318" y="124" font-weight="700" fill="#166534">Red bridge «educonnect-net» · DNS interno de Docker (resolución por nombre de servicio)</text>
+
+  <!-- Puertos -->
+  <rect x="262" y="210" width="76" height="34" rx="6" fill="#1e293b"/>
+  <text x="300" y="232" text-anchor="middle" fill="#fff" font-weight="700">:8000</text>
+  <text x="300" y="262" text-anchor="middle" font-size="11" fill="#334155">público</text>
+  <rect x="262" y="440" width="76" height="34" rx="6" fill="#475569"/>
+  <text x="300" y="462" text-anchor="middle" fill="#fff" font-weight="700">:8001</text>
+  <text x="300" y="492" text-anchor="middle" font-size="11" fill="#334155">127.0.0.1</text>
+  <text x="300" y="506" text-anchor="middle" font-size="11" fill="#334155">Admin API</text>
+
+  <!-- Flechas clientes -> puerto -->
+  <path d="M202,157 C235,160 240,215 260,222" fill="none" stroke="#334155" stroke-width="1.8" marker-end="url(#a)"/>
+  <path d="M202,245 C232,245 240,232 260,230" fill="none" stroke="#334155" stroke-width="1.8" marker-end="url(#a)"/>
+  <path d="M202,328 C236,322 240,248 260,238" fill="none" stroke="#b91c1c" stroke-width="1.8" marker-end="url(#r)"/>
+
+  <!-- Kong -->
+  <rect x="360" y="145" width="380" height="370" rx="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="550" y="170" text-anchor="middle" font-size="15" font-weight="700" fill="#4c1d95">Kong Gateway · contenedor educonnect-kong</text>
+  <text x="550" y="188" text-anchor="middle" font-size="11" fill="#4c1d95">KONG_DATABASE=off · config: kong/kong.yml (montado read-only)</text>
+
+  <rect x="378" y="200" width="344" height="58" rx="7" fill="#fff" stroke="#7c3aed"/>
+  <text x="392" y="219" font-weight="700">1 · Router (Routes)</text>
+  <text x="392" y="236" font-size="11">/api/estudiantes · /api/matriculas · /api/pagos · /api/certificados</text>
+  <text x="392" y="251" font-size="10" fill="#b91c1c">sin coincidencia → 404 «no Route matched»</text>
+
+  <rect x="378" y="266" width="344" height="58" rx="7" fill="#fff" stroke="#7c3aed"/>
+  <text x="392" y="285" font-weight="700">2 · key-auth (alcance Global)</text>
+  <text x="392" y="302" font-size="11">header x-api-key → identifica el Consumer; hide_credentials</text>
+  <text x="392" y="317" font-size="10" fill="#b91c1c">sin llave / llave inválida → 401</text>
+
+  <rect x="378" y="332" width="344" height="104" rx="7" fill="#fff" stroke="#7c3aed"/>
+  <text x="392" y="350" font-weight="700">3 · rate-limiting (policy local, ventana 1 min)</text>
+  <text x="392" y="366" font-size="11">Consumer+Route  app-movil @ certificados ……… 2/min</text>
+  <text x="392" y="380" font-size="11">Consumer        app-movil (3 APIs sumadas) …… 5/min</text>
+  <text x="392" y="394" font-size="11">Route           certificados, por consumidor … 3/min</text>
+  <text x="392" y="408" font-size="11">Global          por consumidor ………………………… 60/min</text>
+  <text x="392" y="428" font-size="10" fill="#b91c1c">límite excedido → 429 + Retry-After</text>
+
+  <rect x="378" y="444" width="344" height="58" rx="7" fill="#fff" stroke="#7c3aed"/>
+  <text x="392" y="463" font-weight="700">4 · Proxy al Service (destino)</text>
+  <text x="392" y="480" font-size="11">strip_path: /api/pagos → /pagos · connect_timeout 2 s</text>
+  <text x="392" y="495" font-size="10" fill="#b91c1c">backend caído → 502 / 503 / 504</text>
+
+  <line x1="550" y1="258" x2="550" y2="266" stroke="#7c3aed" stroke-width="2"/>
+  <line x1="550" y1="324" x2="550" y2="332" stroke="#7c3aed" stroke-width="2"/>
+  <line x1="550" y1="436" x2="550" y2="444" stroke="#7c3aed" stroke-width="2"/>
+
+  <path d="M338,227 L376,227" stroke="#334155" stroke-width="1.8" marker-end="url(#a)"/>
+  <path d="M338,457 L358,457" stroke-dasharray="4 3" stroke="#475569" stroke-width="1.8" marker-end="url(#a)"/>
+
+  <!-- Backends -->
+  <g font-size="12">
+    <rect x="860" y="150" width="250" height="64" rx="8" fill="#fff" stroke="#16a34a"/>
+    <text x="985" y="174" text-anchor="middle" font-weight="700">ms-estudiantes:3001</text>
+    <text x="985" y="194" text-anchor="middle" font-size="11">GET /estudiantes · svc-estudiantes</text>
+
+    <rect x="860" y="236" width="250" height="64" rx="8" fill="#fff" stroke="#16a34a"/>
+    <text x="985" y="260" text-anchor="middle" font-weight="700">ms-matriculas:3002</text>
+    <text x="985" y="280" text-anchor="middle" font-size="11">GET /matriculas · svc-matriculas</text>
+
+    <rect x="860" y="322" width="250" height="64" rx="8" fill="#fff" stroke="#16a34a"/>
+    <text x="985" y="346" text-anchor="middle" font-weight="700">ms-pagos:3003</text>
+    <text x="985" y="366" text-anchor="middle" font-size="11">GET /pagos · svc-pagos</text>
+
+    <rect x="860" y="408" width="250" height="64" rx="8" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.5"/>
+    <text x="985" y="432" text-anchor="middle" font-weight="700">ms-certificados:3004</text>
+    <text x="985" y="452" text-anchor="middle" font-size="11">GET /certificados · desafío de transferencia</text>
+  </g>
+  <path d="M722,474 C790,463 790,182 858,182" fill="none" stroke="#16a34a" stroke-width="1.6" marker-end="url(#a)"/>
+  <path d="M722,474 C800,463 800,268 858,268" fill="none" stroke="#16a34a" stroke-width="1.6" marker-end="url(#a)"/>
+  <path d="M722,474 C810,463 810,354 858,354" fill="none" stroke="#16a34a" stroke-width="1.6" marker-end="url(#a)"/>
+  <path d="M722,474 C800,463 820,440 858,440" fill="none" stroke="#ca8a04" stroke-width="1.6" marker-end="url(#a)"/>
+  <text x="985" y="500" text-anchor="middle" font-size="11" fill="#166534">Sin puertos publicados en el host:</text>
+  <text x="985" y="515" text-anchor="middle" font-size="11" fill="#166534">solo alcanzables a través de Kong</text>
+
+  <!-- Leyenda -->
+  <rect x="300" y="548" width="840" height="118" rx="10" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="318" y="572" font-weight="700" fill="#0f172a">Políticas y límites de la PoC</text>
+  <text x="318" y="594" font-size="12">• Autenticación (AuthN) en el gateway con API Key; la autorización de negocio (AuthZ) sigue siendo responsabilidad de cada backend.</text>
+  <text x="318" y="614" font-size="12">• Contadores de rate limiting en memoria de un único nodo (policy local); con varias instancias se requiere Redis o un balanceo con afinidad.</text>
+  <text x="318" y="634" font-size="12">• Cabeceras agregadas al backend: X-Consumer-Username / X-Consumer-ID. La API Key se elimina antes de reenviar (hide_credentials).</text>
+  <text x="318" y="654" font-size="12">• Fuera de alcance: identidad de usuario final, TLS, alta disponibilidad, monitoreo distribuido, gestión segura de secretos.</text>
+</svg>

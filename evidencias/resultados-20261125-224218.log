@@ -1,0 +1,198 @@
+﻿**********************
+Inicio de la transcripción de Windows PowerShell
+Hora de inicio: 20261125224218
+Nombre de usuario: MSI\danny
+Usuario RunAs: MSI\danny
+Nombre de la configuración: 
+Máquina: MSI (Microsoft Windows NT 10.0.26300.0)
+Aplicación host: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy Bypass -File tests\run-tests.ps1
+Id. de proceso: 35972
+PSVersion: 5.1.26100.9818
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9818
+BuildVersion: 10.0.26100.9818
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+
+==================== RETO 0 - Contenedores, versiÃ³n y red interna ====================
+
+
+{"id":701,"matriculaId":501,"valor":150.00,"estado":"PENDIENTE","servicio":"pagos"}
+
+    [OK]    Backend no expuesto directamente (esperado 000, obtenido 000)
+
+==================== RETO 1 - Punto de acceso Ãºnico ====================
+[2026-11-25 22:42:19] GET http://localhost:8000/api/estudiantes -> HTTP 200 | origen=ms-estudiantes | restante/min=59
+    cuerpo: {"id":101,"nombre":"Ana Perez","servicio":"estudiantes"}
+    [OK]    GET /api/estudiantes responde 200 (esperado 200, obtenido 200)
+    [OK]    GET /api/estudiantes atendido por ms-estudiantes (esperado ms-estudiantes, obtenido ms-estudiantes)
+[2026-11-25 22:42:19] GET http://localhost:8000/api/matriculas -> HTTP 200 | origen=ms-matriculas | restante/min=58
+    cuerpo: {"id":501,"estudianteId":101,"estado":"ACTIVA","servicio":"matriculas"}
+    [OK]    GET /api/matriculas responde 200 (esperado 200, obtenido 200)
+    [OK]    GET /api/matriculas atendido por ms-matriculas (esperado ms-matriculas, obtenido ms-matriculas)
+[2026-11-25 22:42:19] GET http://localhost:8000/api/pagos -> HTTP 200 | origen=ms-pagos | restante/min=57
+    cuerpo: {"id":701,"matriculaId":501,"valor":150.00,"estado":"PENDIENTE","servicio":"pagos"}
+    [OK]    GET /api/pagos responde 200 (esperado 200, obtenido 200)
+    [OK]    GET /api/pagos atendido por ms-pagos (esperado ms-pagos, obtenido ms-pagos)
+
+==================== RETO 2 - API Key (encabezado x-api-key) ====================
+[2026-11-25 22:42:19] GET http://localhost:8000/api/estudiantes -> HTTP 401 | origen=System.Object[] | restante/min=System.Object[]
+    cuerpo: {
+  "message":"No API key found in request",
+  "request_id":"e87d9f472fc81872c3f7502d6d84b339"
+}
+    [OK]    Sin API Key (esperado 401, obtenido 401)
+[2026-11-25 22:42:19] GET http://localhost:8000/api/estudiantes -> HTTP 401 | origen=System.Object[] | restante/min=System.Object[]
+    cuerpo: {
+  "message":"Unauthorized",
+  "request_id":"15479446a7d7297a830f660faafb6609"
+}
+    [OK]    API Key incorrecta (esperado 401, obtenido 401)
+[2026-11-25 22:42:19] GET http://localhost:8000/api/matriculas -> HTTP 200 | origen=ms-matriculas | restante/min=56
+    cuerpo: {"id":501,"estudianteId":101,"estado":"ACTIVA","servicio":"matriculas"}
+    [OK]    API Key vÃ¡lida (esperado 200, obtenido 200)
+
+==================== RETO 3 - 5 req/min para app-movil-educonnect ====================
+[2026-11-25 22:42:19] INICIO de la secuencia
+[2026-11-25 22:42:19] GET http://localhost:8000/api/estudiantes -> HTTP 200 | origen=ms-estudiantes | restante/min=4
+    cuerpo: {"id":101,"nombre":"Ana Perez","servicio":"estudiantes"}
+    [OK]    Solicitud #1 (dentro del lÃ­mite) (esperado 200, obtenido 200)
+[2026-11-25 22:42:20] GET http://localhost:8000/api/matriculas -> HTTP 200 | origen=ms-matriculas | restante/min=3
+    cuerpo: {"id":501,"estudianteId":101,"estado":"ACTIVA","servicio":"matriculas"}
+    [OK]    Solicitud #2 (dentro del lÃ­mite) (esperado 200, obtenido 200)
+[2026-11-25 22:42:20] GET http://localhost:8000/api/pagos -> HTTP 200 | origen=ms-pagos | restante/min=2
+    cuerpo: {"id":701,"matriculaId":501,"valor":150.00,"estado":"PENDIENTE","servicio":"pagos"}
+    [OK]    Solicitud #3 (dentro del lÃ­mite) (esperado 200, obtenido 200)
+[2026-11-25 22:42:20] GET http://localhost:8000/api/estudiantes -> HTTP 200 | origen=ms-estudiantes | restante/min=1
+    cuerpo: {"id":101,"nombre":"Ana Perez","servicio":"estudiantes"}
+    [OK]    Solicitud #4 (dentro del lÃ­mite) (esperado 200, obtenido 200)
+[2026-11-25 22:42:20] GET http://localhost:8000/api/matriculas -> HTTP 200 | origen=ms-matriculas | restante/min=0
+    cuerpo: {"id":501,"estudianteId":101,"estado":"ACTIVA","servicio":"matriculas"}
+    [OK]    Solicitud #5 (dentro del lÃ­mite) (esperado 200, obtenido 200)
+[2026-11-25 22:42:20] GET http://localhost:8000/api/pagos -> HTTP 429 | origen=System.Object[] | restante/min=0
+    cuerpo: {
+  "message":"API rate limit exceeded",
+  "request_id":"875bc45f697eff16b9e3ce5d9ca25826"
+}
+    [OK]    Solicitud #6 (supera el lÃ­mite) (esperado 429, obtenido 429)
+[2026-11-25 22:42:20] GET http://localhost:8000/api/pagos -> HTTP 429 | origen=System.Object[] | restante/min=0
+    cuerpo: {
+  "message":"API rate limit exceeded",
+  "request_id":"105629113df3346d479ebf2fbce99d0e"
+}
+    [OK]    Solicitud #7 (supera el lÃ­mite) (esperado 429, obtenido 429)
+[2026-11-25 22:42:20] GET http://localhost:8000/api/estudiantes -> HTTP 200 | origen=ms-estudiantes | restante/min=55
+    cuerpo: {"id":101,"nombre":"Ana Perez","servicio":"estudiantes"}
+    [OK]    Otro consumidor (qa) sigue con 200 (esperado 200, obtenido 200)
+
+==================== RETO 4 - Ruta no registrada y backend caÃ­do ====================
+[2026-11-25 22:42:20] GET http://localhost:8000/api/no-existe -> HTTP 404 | origen=System.Object[] | restante/min=System.Object[]
+    cuerpo: {
+  "message":"no Route matched with those values",
+  "request_id":"8db34310c2089e3140add87cfc56a019"
+}
+    [OK]    Ruta no registrada (esperado 404, obtenido 404)
+[2026-11-25 22:42:20] POST http://localhost:8000/api/estudiantes -> HTTP 404 | origen=System.Object[] | restante/min=System.Object[]
+    cuerpo: {
+  "message":"no Route matched with those values",
+  "request_id":"0d109b0d6377ab2b348e393f0e013e1d"
+}
+    [OK]    POST no habilitado en la Route (esperado 404, obtenido 404)
+[2026-11-25 22:42:20] Deteniendo ms-pagos...
+
+[2026-11-25 22:42:24] GET http://localhost:8000/api/pagos -> HTTP 504 | origen=System.Object[] | restante/min=54
+    cuerpo: {
+  "message":"The upstream server is timing out",
+  "request_id":"04b33a7b2f19e650c7b1ea31f3870e51"
+}
+    [OK]    Backend no disponible (esperado 502|503|504, obtenido 504)
+
+educonnect-kong  | 172.20.0.1 - - [26/Nov/2026:03:42:20 +0000] "GET /api/no-existe HTTP/1.1" 404 103 "-" "curl/8.22.0" kong_request_id: "8db34310c2089e3140add87cfc56a019"
+educonnect-kong  | 172.20.0.1 - - [26/Nov/2026:03:42:20 +0000] "POST /api/estudiantes HTTP/1.1" 404 103 "-" "curl/8.22.0" kong_request_id: "0d109b0d6377ab2b348e393f0e013e1d"
+educonnect-kong  | 2026/11/26 03:42:22 [error] 1405#0: *10372 upstream timed out (110: Connection timed out) while connecting to upstream, client: 172.20.0.1, server: kong,
+request: "GET /api/pagos HTTP/1.1", upstream: "http://172.20.0.4:3003/pagos", host: "localhost:8000", request_id: "04b33a7b2f19e650c7b1ea31f3870e51"
+educonnect-kong  | 2026/11/26 03:42:24 [error] 1405#0: *10372 upstream timed out (110: Connection timed out) while connecting to upstream, client: 172.20.0.1, server: kong,
+request: "GET /api/pagos HTTP/1.1", upstream: "http://172.20.0.4:3003/pagos", host: "localhost:8000", request_id: "04b33a7b2f19e650c7b1ea31f3870e51"
+educonnect-kong  | 172.20.0.1 - - [26/Nov/2026:03:42:24 +0000] "GET /api/pagos HTTP/1.1" 504 102 "-" "curl/8.22.0" kong_request_id: "04b33a7b2f19e650c7b1ea31f3870e51"
+[2026-11-25 22:42:25] Reiniciando ms-pagos...
+
+[2026-11-25 22:42:27] GET http://localhost:8000/api/pagos -> HTTP 200 | origen=ms-pagos | restante/min=53
+    cuerpo: {"id":701,"matriculaId":501,"valor":150.00,"estado":"PENDIENTE","servicio":"pagos"}
+    [OK]    Backend recuperado (intento 1) (esperado 200, obtenido 200)
+
+==================== DESAFÃO - Certificados ====================
+[2026-11-25 22:42:27] GET http://localhost:8000/api/certificados -> HTTP 401 | origen=System.Object[] | restante/min=System.Object[]
+    cuerpo: {
+  "message":"No API key found in request",
+  "request_id":"2d3ba405e556f305c1d2c31fb4966865"
+}
+    [OK]    Certificados sin API Key (esperado 401, obtenido 401)
+[2026-11-25 22:42:27] GET http://localhost:8000/api/certificados -> HTTP 200 | origen=ms-certificados | restante/min=2
+    cuerpo: {"id":901,"estudianteId":101,"tipo":"RECORD_ACADEMICO","estado":"EMITIDO","servicio":"certificados"}
+    [OK]    Certificados qa #1 (lÃ­mite ruta 3/min) (esperado 200, obtenido 200)
+[2026-11-25 22:42:27] GET http://localhost:8000/api/certificados -> HTTP 200 | origen=ms-certificados | restante/min=1
+    cuerpo: {"id":901,"estudianteId":101,"tipo":"RECORD_ACADEMICO","estado":"EMITIDO","servicio":"certificados"}
+    [OK]    Certificados qa #2 (lÃ­mite ruta 3/min) (esperado 200, obtenido 200)
+[2026-11-25 22:42:27] GET http://localhost:8000/api/certificados -> HTTP 200 | origen=ms-certificados | restante/min=0
+    cuerpo: {"id":901,"estudianteId":101,"tipo":"RECORD_ACADEMICO","estado":"EMITIDO","servicio":"certificados"}
+    [OK]    Certificados qa #3 (lÃ­mite ruta 3/min) (esperado 200, obtenido 200)
+[2026-11-25 22:42:27] GET http://localhost:8000/api/certificados -> HTTP 429 | origen=System.Object[] | restante/min=0
+    cuerpo: {
+  "message":"API rate limit exceeded",
+  "request_id":"611cab6b108bce4eae641c0a6e2c4679"
+}
+    [OK]    Certificados qa #4 (esperado 429, obtenido 429)
+[2026-11-25 22:42:27] GET http://localhost:8000/api/certificados -> HTTP 200 | origen=ms-certificados | restante/min=1
+    cuerpo: {"id":901,"estudianteId":101,"tipo":"RECORD_ACADEMICO","estado":"EMITIDO","servicio":"certificados"}
+    [OK]    Certificados app-movil #1 (Consumer+Route 2/min) (esperado 200, obtenido 200)
+[2026-11-25 22:42:27] GET http://localhost:8000/api/certificados -> HTTP 200 | origen=ms-certificados | restante/min=0
+    cuerpo: {"id":901,"estudianteId":101,"tipo":"RECORD_ACADEMICO","estado":"EMITIDO","servicio":"certificados"}
+    [OK]    Certificados app-movil #2 (Consumer+Route 2/min) (esperado 200, obtenido 200)
+[2026-11-25 22:42:27] GET http://localhost:8000/api/certificados -> HTTP 429 | origen=System.Object[] | restante/min=0
+    cuerpo: {
+  "message":"API rate limit exceeded",
+  "request_id":"19876760aa0d08639711113546c20b66"
+}
+    [OK]    Certificados app-movil #3 (esperado 429, obtenido 429)
+
+==================== ConfiguraciÃ³n cargada (Admin API) ====================
+
+
+
+name             host            port path
+----             ----            ---- ----
+svc-estudiantes  ms-estudiantes  3001 /estudiantes
+svc-matriculas   ms-matriculas   3002 /matriculas
+svc-pagos        ms-pagos        3003 /pagos
+svc-certificados ms-certificados 3004 /certificados
+
+
+
+name            paths             strip_path
+----            -----             ----------
+rt-certificados /api/certificados       True
+rt-matriculas   /api/matriculas         True
+rt-pagos        /api/pagos              True
+rt-estudiantes  /api/estudiantes        True
+
+
+
+instance_name             name          consumer                             route
+-------------             ----          --------                             -----
+key-auth-global           key-auth
+rl-consumidor-app-movil   rate-limiting 23af3cf2-bbc2-58eb-8692-6e1e99e7144d
+rl-base-global            rate-limiting
+rl-certificados-ruta      rate-limiting                                      0cb69209-eee2-51e5-a350-06d845541914
+rl-app-movil-certificados rate-limiting 23af3cf2-bbc2-58eb-8692-6e1e99e7144d 0cb69209-eee2-51e5-a350-06d845541914
+
+
+
+==================== RESUMEN ====================
+Correctas: 30 | Fallidas: 0 | Evidencia: evidencias\resultados-20261125-224218.log
+**********************
+Fin de la transcripción de Windows PowerShell
+Hora de finalización: 20261125224229
+**********************
