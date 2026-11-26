@@ -138,6 +138,33 @@ for i in 1 2 3 4 5 6; do
 done
 ```
 
+### Problemas encontrados al ejecutar en Windows (y su solución)
+
+Estos errores aparecieron durante la ejecución real de la PoC en Windows con PowerShell. Se registran como evidencia del proceso de diagnóstico.
+
+| # | Comando ejecutado | Error observado | Causa | Solución |
+|---|---|---|---|---|
+| 1 | Se pegaron en PowerShell, en un mismo bloque, `bash tests/run-tests.sh` y el texto explicativo `(o en Windows: powershell ...)` | `o : El término 'o' no se reconoce como nombre de un cmdlet, función, archivo de script o programa ejecutable.` | PowerShell interpretó el texto entre paréntesis como un comando. Era una nota de la documentación, no parte del comando. | Ejecutar una sola línea por vez, solo el comando correspondiente al sistema operativo. |
+| 2 | `bash tests/run-tests.sh` en PowerShell | `<3>WSL (5324 - Relay) ERROR: CreateProcessCommon:640: execvpe(/bin/bash) failed: No such file or directory` | En Windows, `bash` invoca WSL (Subsistema de Windows para Linux), que no tiene ninguna distribución instalada. El script `.sh` es para Linux/macOS/Git Bash. | En Windows usar el script de PowerShell: `powershell -ExecutionPolicy Bypass -File tests\run-tests.ps1`. Alternativa: ejecutar el `.sh` desde **Git Bash**. |
+
+> Nota: los errores 1 y 2 no afectaron a la PoC. `docker compose up -d` se había ejecutado correctamente y los cinco contenedores estaban en estado *Running*; solo falló el lanzamiento del script de pruebas.
+
+**Otros problemas previstos (no observados, pero prevenidos en los scripts):**
+
+| # | Situación | Síntoma | Causa | Solución |
+|---|---|---|---|---|
+| 3 | `run-tests.ps1` en Windows PowerShell 5.1 | Tildes y eñes mal mostradas en la consola y en el log (p. ej. `versiÃ³n`) | PowerShell 5.1 lee los scripts sin BOM como ANSI (Windows-1252), no como UTF-8. | El script se guardó como **UTF-8 con BOM**. Si se edita, conservar esa codificación (en VS Code: *Save with Encoding → UTF-8 with BOM*). |
+| 4 | `curl` en PowerShell 5.1 | Respuestas en formato de objeto o errores de parámetros (`-H`, `-i`) | En Windows PowerShell 5.1, `curl` es un alias de `Invoke-WebRequest`. | Usar `curl.exe` explícitamente (los scripts ya lo hacen). |
+| 5 | Ejecución de scripts `.ps1` | `... no se puede cargar porque la ejecución de scripts está deshabilitada en este sistema` | Política de ejecución de PowerShell restringida por defecto. | Usar `-ExecutionPolicy Bypass` solo para esa ejecución (no cambia la configuración del equipo). |
+
+**Comando correcto según el entorno:**
+
+| Entorno | Comando |
+|---|---|
+| Windows – PowerShell | `powershell -ExecutionPolicy Bypass -File tests\run-tests.ps1` |
+| Windows – Git Bash | `bash tests/run-tests.sh` |
+| Linux / macOS | `bash tests/run-tests.sh` |
+
 ## 7. Logs y diagnóstico
 
 ```bash
